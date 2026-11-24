@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.4.1
 
-- Key help text reworded; build workflow on current action versions; small code tidy-ups.
+- Key help text reworded.
+- Housekeeping: build workflow on current action versions, sorted imports, `SECURITY.md`.
 
 ## 0.4.0
 

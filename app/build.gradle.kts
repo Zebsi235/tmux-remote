@@ -12,8 +12,8 @@ android {
         applicationId = "com.zebsi.tmuxremote"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.4.0"
+        versionCode = 8
+        versionName = "0.4.1"
         // Phones only; keeps the speech library out of the APK three more times.
         ndk { abiFilters += "arm64-v8a" }
     }
