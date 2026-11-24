@@ -10,6 +10,8 @@ import com.trilead.ssh2.Connection
 import com.trilead.ssh2.InteractiveCallback
 import com.trilead.ssh2.ServerHostKeyVerifier
 import com.trilead.ssh2.Session
+import com.zebsi.tmuxremote.TmuxScripts.MARK
+import com.zebsi.tmuxremote.TmuxScripts.NATURAL
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.security.MessageDigest
@@ -18,9 +20,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
-import com.zebsi.tmuxremote.TmuxScripts.MARK
-import com.zebsi.tmuxremote.TmuxScripts.NATURAL
-import com.zebsi.tmuxremote.TmuxScripts.q
 
 data class TmuxSession(val id: String, val name: String, val windows: Int)
 data class TmuxWindow(

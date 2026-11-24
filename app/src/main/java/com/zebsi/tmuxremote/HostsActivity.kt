@@ -6,10 +6,13 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.InputType
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -28,6 +31,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.trilead.ssh2.crypto.PEMDecoder
+import java.io.File
 
 class HostsActivity : Activity() {
 
@@ -43,11 +47,11 @@ class HostsActivity : Activity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // Self-test for debug builds: recognise files/speechtest.wav and write the text to the log.
-        if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             intent.getStringExtra("speechtest")?.let { lang ->
-                val t0 = android.os.SystemClock.elapsedRealtime()
-                Dictation.transcribe(this, lang, java.io.File(filesDir, "speechtest.wav").inputStream()) {
-                    android.util.Log.i("TmuxRemoteSpeech", "$lang (${android.os.SystemClock.elapsedRealtime() - t0} ms): $it")
+                val t0 = SystemClock.elapsedRealtime()
+                Dictation.transcribe(this, lang, File(filesDir, "speechtest.wav").inputStream()) {
+                    Log.i("TmuxRemoteSpeech", "$lang (${SystemClock.elapsedRealtime() - t0} ms): $it")
                 }
             }
         }

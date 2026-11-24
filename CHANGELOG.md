@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Key help text reworded; build workflow on current action versions; small code tidy-ups.
+
 ## 0.4.0
 
 First version prepared for the public.

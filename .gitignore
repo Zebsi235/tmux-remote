@@ -1,11 +1,16 @@
+# Build output
 .gradle/
+.kotlin/
 build/
 app/build/
-local.properties
-*.apk
-.kotlin/
 out/
+*.apk
+local.properties
+
+# Downloaded by tools/fetch_speech_models.sh
 .cache/
 app/src/main/assets/speech/
+
+# Release signing, never committed
 keystore.properties
 *.jks

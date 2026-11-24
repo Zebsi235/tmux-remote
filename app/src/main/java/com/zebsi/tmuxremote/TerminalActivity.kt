@@ -1,8 +1,7 @@
 package com.zebsi.tmuxremote
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.ClipData
@@ -10,17 +9,17 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.graphics.Color
-import android.graphics.Typeface
-import android.os.Bundle
-import android.text.InputType
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
@@ -558,7 +557,7 @@ class TerminalActivity : Activity(), TmuxLink.Listener, TerminalViewClient, Term
 
     private fun showKeyHelp() {
         val text = """
-            ESC, TAB  the keys of that name. ⇧TAB is Shift+Tab (in Claude Code it switches the mode).
+            ESC, TAB  the keys of that name. ⇧TAB is Shift+Tab (many terminal programs use it to step back or switch a mode).
             / - |  these characters, to save a trip to the symbol keyboard.
             HOME, END  jump to the start or end of the line.
             ↑ ↓ ← →  arrow keys. Hold to repeat.

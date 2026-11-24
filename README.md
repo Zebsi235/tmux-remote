@@ -51,7 +51,7 @@ to be installed or configured on the host besides `sshd` and `tmux`.
 
 Take the APK from the [releases](https://github.com/Zebsi235/tmux-remote/releases), or build it
 yourself (below).
-It needs Android 8 or newer on a 64-bit ARM phone and is about 105 MB because of the two speech
+It needs Android 8 or newer on a 64-bit ARM phone and is about 100 MB because of the two speech
 models.
 
 First start:

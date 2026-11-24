@@ -8,8 +8,6 @@ import android.util.Base64
 import com.trilead.ssh2.crypto.keys.Ed25519KeyPairGenerator
 import com.trilead.ssh2.crypto.keys.Ed25519PrivateKey
 import com.trilead.ssh2.crypto.keys.Ed25519PublicKey
-import org.json.JSONArray
-import org.json.JSONObject
 import java.security.KeyPair
 import java.security.KeyStore
 import java.security.SecureRandom
@@ -18,6 +16,8 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import org.json.JSONArray
+import org.json.JSONObject
 
 /** How a host logs in. */
 object Auth {

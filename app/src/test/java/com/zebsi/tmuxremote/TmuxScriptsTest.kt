@@ -1,10 +1,10 @@
 package com.zebsi.tmuxremote
 
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 /** The command texts sent to the host and the parsers for their output. */
 class TmuxScriptsTest {

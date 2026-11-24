@@ -3,15 +3,15 @@ package com.zebsi.tmuxremote
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import java.io.File
+import java.io.InputStream
+import kotlin.concurrent.thread
 import org.json.JSONObject
 import org.vosk.Model
 import org.vosk.Recognizer
 import org.vosk.android.RecognitionListener
 import org.vosk.android.SpeechService
 import org.vosk.android.SpeechStreamService
-import java.io.File
-import java.io.InputStream
-import kotlin.concurrent.thread
 
 /**
  * Speech to text on the phone itself (Vosk). The German and English models ship inside the APK
