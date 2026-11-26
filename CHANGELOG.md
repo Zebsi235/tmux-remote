@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Scrolling by finger now works in Codex. It draws full-screen, takes no mouse events and
+  ignores arrow keys, so a drag is turned into PgUp/PgDn there.
+
 ## 0.4.1
 
 - Key help text reworded.

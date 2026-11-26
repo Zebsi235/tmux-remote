@@ -23,7 +23,7 @@ to be installed or configured on the host besides `sshd` and `tmux`.
   previous session.
 - **Scrolling by finger.** Drag on the terminal. In a plain pane the app puts tmux into copy
   mode and leaves it again at the bottom; in a full-screen program (less, vim) it sends wheel
-  events or arrow keys. `⤓` jumps back to the live bottom.
+  events or arrow keys, and page keys for Codex. `⤓` jumps back to the live bottom.
 - **Key rows.** ESC, TAB, Shift+TAB, sticky CTRL and ALT (tap twice to lock), arrows, HOME/END,
   PGUP/PGDN, `/ - |`, PASTE, a keyboard toggle, a microphone key, and PFX, which sends the tmux
   prefix of the host. The menu has a short "What the keys do".

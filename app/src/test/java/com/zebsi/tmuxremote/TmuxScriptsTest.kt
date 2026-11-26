@@ -62,6 +62,13 @@ class TmuxScriptsTest {
         assertTrue(TmuxScripts.scroll("/dev/pts/1", 100000).contains("n=300; d=down;"))
     }
 
+    @Test
+    fun codexIsScrolledWithPageKeys() {
+        val script = TmuxScripts.scroll("/dev/pts/1", -5)
+        assertTrue(script.contains("case \"\$6\" in codex*)"))
+        assertTrue(script.contains("PageUp") && script.contains("PageDown"))
+    }
+
     /** Every script must at least be valid shell (sh -n parses without running). */
     @Test
     fun scriptsAreValidShell() {

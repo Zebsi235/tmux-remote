@@ -51,20 +51,37 @@ object TmuxScripts {
     fun cancelCopyMode(tty: String) = clientSid(tty) + "tmux send-keys -t \"\$sid:\" -X cancel"
 
     /**
+     * Programs that draw full-screen, take no mouse events and ignore arrow keys for scrolling,
+     * but page with PgUp/PgDn. Matched against the start of tmux's pane_current_command.
+     */
+    val PAGE_KEY_PROGRAMS = listOf("codex")
+
+    /**
      * Scroll the pane the client looks at by [rowsDown] lines (negative = back in history).
      * Plain pane: tmux copy mode, which ends by itself at the bottom (-e).
-     * Full-screen program: wheel events if it asked for the mouse, else arrow keys.
+     * Full-screen program: wheel events if it asked for the mouse; PgUp/PgDn for the programs in
+     * [PAGE_KEY_PROGRAMS] (one page per 60 % of the pane height dragged, the rest is remembered
+     * in a pane option between calls); arrow keys for everything else.
      */
     fun scroll(tty: String, rowsDown: Int): String {
         val n = minOf(kotlin.math.abs(rowsDown), 300)
         val d = if (rowsDown < 0) "up" else "down"
+        val pagers = PAGE_KEY_PROGRAMS.joinToString("|") { "$it*" }
         return clientSid(tty) + "n=$n; d=$d; " +
-            "set -- \$(tmux display-message -p -t \"\$sid:\" '#{pane_in_mode} #{alternate_on} #{mouse_any_flag} #{mouse_sgr_flag}'); " +
+            "set -- \$(tmux display-message -p -t \"\$sid:\" '#{pane_in_mode} #{alternate_on} #{mouse_any_flag} #{mouse_sgr_flag} #{pane_height} #{pane_current_command}'); " +
             "if [ \"\$1\" != 1 ] && [ \"\$2\" = 1 ]; then " +
             "if [ \"\$3\" = 1 ] && [ \"\$4\" = 1 ]; then " +
             "if [ \$d = up ]; then b=34; else b=35; fi; " +
             "tmux send-keys -t \"\$sid:\" -N \$n -H 1b 5b 3c 36 \$b 3b 31 3b 31 4d; " +
-            "else if [ \$d = up ]; then k=Up; else k=Down; fi; tmux send-keys -t \"\$sid:\" -N \$n \$k; fi; " +
+            "else case \"\$6\" in $pagers) " +
+            "step=\$((\$5*6/10)); [ \$step -ge 4 ] || step=4; " +
+            "acc=\$(tmux show-options -p -q -v -t \"\$sid:\" @tmuxremote_scroll 2>/dev/null); acc=\${acc:-0}; " +
+            "if [ \$d = up ]; then acc=\$((acc-n)); else acc=\$((acc+n)); fi; " +
+            "p=\$((acc/step)); acc=\$((acc-p*step)); " +
+            "tmux set-option -p -t \"\$sid:\" @tmuxremote_scroll \$acc 2>/dev/null; " +
+            "if [ \$p -lt 0 ]; then tmux send-keys -t \"\$sid:\" -N \$((0-p)) PageUp; " +
+            "elif [ \$p -gt 0 ]; then tmux send-keys -t \"\$sid:\" -N \$p PageDown; fi ;; " +
+            "*) if [ \$d = up ]; then k=Up; else k=Down; fi; tmux send-keys -t \"\$sid:\" -N \$n \$k ;; esac; fi; " +
             "elif [ \$d = up ]; then tmux copy-mode -e -t \"\$sid:\" \\; send-keys -t \"\$sid:\" -X -N \$n scroll-up; " +
             "elif [ \"\$1\" = 1 ]; then tmux send-keys -t \"\$sid:\" -X -N \$n scroll-down; fi"
     }

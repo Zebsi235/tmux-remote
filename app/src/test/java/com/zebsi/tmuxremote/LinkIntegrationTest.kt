@@ -151,6 +151,23 @@ class LinkIntegrationTest {
             assertEquals("less moved 7 lines", "8", shot)
             exec(c, "tmux send-keys -t ${TmuxScripts.q("$idA:")} q")
 
+            // A program that only pages with PgUp/PgDn (Codex): a copy of less under a name the
+            // app treats that way. The pane is 23 rows high (24 minus the tmux status line), so one
+            // page key is due per 13 rows dragged and the pager moves 22 lines per page.
+            exec(c, "cp \"\$(command -v less)\" /tmp/codex-zz-tmuxremote; seq 1 500 > /tmp/codex-zz-tmuxremote.txt")
+            exec(c, "tmux send-keys -t ${TmuxScripts.q("$idA:")} 'clear; /tmp/codex-zz-tmuxremote /tmp/codex-zz-tmuxremote.txt' Enter")
+            waitFor("pager on the alternate screen") { pane("#{alternate_on} #{pane_current_command}").startsWith("1 codex") }
+            exec(c, TmuxScripts.scroll(tty, 10))
+            Thread.sleep(300)
+            assertEquals("10 rows are less than a page", "1", exec(c, "tmux capture-pane -p -t ${TmuxScripts.q("$idA:")}").first.lines().first().trim())
+            exec(c, TmuxScripts.scroll(tty, 20))
+            Thread.sleep(300)
+            assertEquals("30 rows = two pages", "45", exec(c, "tmux capture-pane -p -t ${TmuxScripts.q("$idA:")}").first.lines().first().trim())
+            exec(c, TmuxScripts.scroll(tty, -20))
+            Thread.sleep(300)
+            assertEquals("one page back", "23", exec(c, "tmux capture-pane -p -t ${TmuxScripts.q("$idA:")}").first.lines().first().trim())
+            exec(c, "tmux send-keys -t ${TmuxScripts.q("$idA:")} q; rm -f /tmp/codex-zz-tmuxremote /tmp/codex-zz-tmuxremote.txt")
+
             // New, rename, close.
             assertEquals(0, exec(c, TmuxScripts.newSession(tty, "zz-tmuxremote-c")).second)
             assertEquals("zz-tmuxremote-c", state().current?.name)
@@ -186,7 +203,7 @@ class LinkIntegrationTest {
             println("tail: " + seen.takeLast(40).toString().replace("\u001b", "ESC").trim())
             assertTrue(seen.takeLast(300).contains("[exited]"))
         } finally {
-            runCatching { exec(c, "for s in a b c d; do tmux kill-session -t =zz-tmuxremote-\$s 2>/dev/null; done; true") }
+            runCatching { exec(c, "for s in a b c d; do tmux kill-session -t =zz-tmuxremote-\$s 2>/dev/null; done; rm -f /tmp/codex-zz-tmuxremote /tmp/codex-zz-tmuxremote.txt; true") }
             c.close()
         }
     }
