@@ -38,6 +38,8 @@ class App : Application() {
         TmuxLink.keepAliveHook = { on -> ui.post { KeepAliveService.set(this, on) } }
         TmuxLink.busyHook = { busy -> ui.post { KeepAliveService.hold(busy) } }
         TmuxLink.alertSink = { host, alert -> ui.post { postAlert(host, alert) } }
+        Speaker.init(this)
+        TmuxLink.speakSink = { text -> ui.post { Speaker.say(text) } }
     }
 
     private fun postAlert(host: Host, alert: Alert) {

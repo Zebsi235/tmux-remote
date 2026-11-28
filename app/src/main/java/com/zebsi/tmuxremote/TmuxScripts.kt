@@ -48,6 +48,41 @@ object TmuxScripts {
 
     fun newWindow(tty: String) = clientSid(tty) + "tmux new-window -t \"\$sid:\""
 
+    /**
+     * Spoken replies. Marks the client's session as "the phone is listening" (the host hook
+     * tools/host/tmuxremote_voice.py looks at that mark) and prints the size of the say log,
+     * then what was added to it after byte [offset]. A negative offset only asks for the size.
+     */
+    fun sayPoll(tty: String, offset: Long): String {
+        val tail = if (offset < 0) "" else " if [ \"\$n\" -gt $offset ]; then tail -c +${offset + 1} \"\$f\"; fi"
+        return clientSid(tty) + "tmux set-option -t \"\$sid\" @tmuxremote_voice \"\$(date +%s)\"; " +
+            "f=\"\$HOME/.cache/tmuxremote/say.log\"; n=0; [ -f \"\$f\" ] && n=\$(wc -c < \"\$f\" | tr -d ' '); " +
+            "printf 'Z\\t%s\\n' \"\$n\";" + tail
+    }
+
+    /** The phone stopped listening to the client's session. */
+    fun sayOff(tty: String) = clientSid(tty) + "tmux set-option -t \"\$sid\" -u @tmuxremote_voice"
+
+    class Said(val sessionId: String, val text: String)
+    class SayResult(val offset: Long, val said: List<Said>)
+
+    /** Reads the answer of [sayPoll]. Only complete lines count; the offset moves past them. */
+    fun parseSay(out: String, offset: Long): SayResult {
+        val first = out.substringBefore('\n')
+        val size = first.removePrefix("Z\t").trim().toLongOrNull() ?: return SayResult(offset, emptyList())
+        if (!first.startsWith("Z\t")) return SayResult(offset, emptyList())
+        if (offset < 0 || size < offset) return SayResult(size, emptyList())
+        val body = out.substringAfter('\n', "")
+        val end = body.lastIndexOf('\n')
+        if (end < 0) return SayResult(offset, emptyList())
+        val whole = body.substring(0, end + 1)
+        val said = whole.lines().mapNotNull { line ->
+            val f = line.split('\t', limit = 3)
+            if (f.size == 3 && f[2].isNotBlank()) Said(f[1], f[2].trim()) else null
+        }
+        return SayResult(offset + whole.toByteArray(Charsets.UTF_8).size, said)
+    }
+
     fun cancelCopyMode(tty: String) = clientSid(tty) + "tmux send-keys -t \"\$sid:\" -X cancel"
 
     /**

@@ -109,6 +109,10 @@ object TmuxLink {
     /** Receives alerts for watched sessions while they are not on screen. Any thread. */
     @Volatile var alertSink: ((Host, Alert) -> Unit)? = null
 
+    /** Gets each spoken line of the session on screen while "Speak replies" is on. */
+    @Volatile var speakSink: ((String) -> Unit)? = null
+    @Volatile private var sayOffset = -1L
+
     init {
         // Foreground: every 2.5 s. Background with watched sessions: every 5 s.
         ctl.scheduleWithFixedDelay({ if (active || (keepAlive && tick++ % 2 == 0)) pollOnce() }, 1000, 2500, TimeUnit.MILLISECONDS)
@@ -554,9 +558,23 @@ object TmuxLink {
                 }
             }
             ui.post { listener?.onState(st) }
+            if (Store.speakReplies && tty.isNotEmpty()) {
+                val said = exec(c, TmuxScripts.sayPoll(tty, sayOffset))
+                if (g == gen && said.status == 0) {
+                    val res = TmuxScripts.parseSay(said.out, sayOffset)
+                    sayOffset = res.offset
+                    for (s in res.said) if (s.sessionId == st.currentId) speakSink?.invoke(s.text)
+                }
+            }
         } catch (e: Exception) {
             lost(g)
         }
+    }
+
+    /** "Speak replies" was switched. Starts at the end of the log, so nothing old is read out. */
+    fun speakingChanged(on: Boolean) {
+        sayOffset = -1L
+        if (on) pollSoon() else if (hasTty) command(TmuxScripts.sayOff(tty))
     }
 
     // ------------------------------------------------------------------ actions

@@ -71,13 +71,34 @@ class TmuxScriptsTest {
 
     /** Every script must at least be valid shell (sh -n parses without running). */
     @Test
+    fun sayLogIsReadFromWhereItStopped() {
+        // First look: only the size, nothing old is spoken.
+        val start = TmuxScripts.parseSay("Z\t40\n", -1)
+        assertEquals(40L, start.offset)
+        assertTrue(start.said.isEmpty())
+        // New complete lines are taken, a half-written one waits for the next look.
+        val two = "1\t\$3\tTests pass. Shall I push?\n2\t\$4\tGrüße\n"
+        val r = TmuxScripts.parseSay("Z\t999\n" + two + "3\t\$3\thalf", 40)
+        assertEquals(listOf("\$3", "\$4"), r.said.map { it.sessionId })
+        assertEquals("Tests pass. Shall I push?", r.said[0].text)
+        assertEquals(40L + two.toByteArray().size, r.offset)
+        // Nothing new, and a log that got shorter (rewritten on the host).
+        assertEquals(40L, TmuxScripts.parseSay("Z\t40\n", 40).offset)
+        assertEquals(10L, TmuxScripts.parseSay("Z\t10\n", 40).offset)
+        // No answer at all leaves the offset alone.
+        assertEquals(40L, TmuxScripts.parseSay("", 40).offset)
+        assertTrue(TmuxScripts.sayPoll("/dev/pts/1", 40).contains("tail -c +41 "))
+        assertFalse(TmuxScripts.sayPoll("/dev/pts/1", -1).contains("tail -c"))
+    }
+
+    @Test
     fun scriptsAreValidShell() {
         val tty = "/dev/pts/1"
         val scripts = listOf(
             TmuxScripts.PROBE, TmuxScripts.LIST_NAMES, TmuxScripts.STATE, TmuxScripts.attach("a b"),
             TmuxScripts.switchTo(tty, "\$1"), TmuxScripts.newSession(tty, ""), TmuxScripts.newSession(tty, "x y"),
             TmuxScripts.rename("\$1", "n"), TmuxScripts.kill("\$1"), TmuxScripts.switchThenKill(tty, "\$1", "\$2"),
-            TmuxScripts.newWindow(tty), TmuxScripts.cancelCopyMode(tty), TmuxScripts.scroll(tty, -3), TmuxScripts.scroll(tty, 3),
+            TmuxScripts.newWindow(tty), TmuxScripts.cancelCopyMode(tty), TmuxScripts.sayPoll(tty, -1), TmuxScripts.sayPoll(tty, 120), TmuxScripts.sayOff(tty), TmuxScripts.scroll(tty, -3), TmuxScripts.scroll(tty, 3),
         )
         for (s in scripts) {
             val p = ProcessBuilder("sh", "-n", "-c", s).redirectErrorStream(true).start()

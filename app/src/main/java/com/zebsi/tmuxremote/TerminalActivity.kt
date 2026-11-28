@@ -433,6 +433,7 @@ class TerminalActivity : Activity(), TmuxLink.Listener, TerminalViewClient, Term
         PopupMenu(this, anchor).apply {
             menu.add("Paste").setOnMenuItemClickListener { paste(); true }
             menu.add("Write a message").setOnMenuItemClickListener { compose(); true }
+            menu.add(if (Store.speakReplies) "Speak replies: on" else "Speak replies: off").setOnMenuItemClickListener { toggleSpeak(); true }
             menu.add("What the keys do").setOnMenuItemClickListener { showKeyHelp(); true }
             menu.add("New session").setOnMenuItemClickListener { newSessionDialog(); true }
             menu.add("New window").setOnMenuItemClickListener { TmuxLink.newWindow(); true }
@@ -507,10 +508,22 @@ class TerminalActivity : Activity(), TmuxLink.Listener, TerminalViewClient, Term
         composeBox.show()
     }
 
+    /** Menu: read out the short spoken line that ends each reply of the session on screen. */
+    private fun toggleSpeak() {
+        val on = !Store.speakReplies
+        Store.speakReplies = on
+        Speaker.onProblem = { toast(it) }
+        if (on) Speaker.say(if (Store.speechLang == "de") "Antworten werden vorgelesen." else "Replies are read out.")
+        else Speaker.stop()
+        TmuxLink.speakingChanged(on)
+        toast(if (on) "Speaking replies of the session on screen, in ${langName()}. The host needs the voice hook." else "Speaking is off.")
+    }
+
     private fun langName() = if (Store.speechLang == "de") "Deutsch" else "English"
 
     /** Microphone key: speech is typed into the terminal at the cursor (no Enter) until tapped again. */
     override fun dictate() {
+        Speaker.stop()
         if (dictating) {
             stopDictation()
             return

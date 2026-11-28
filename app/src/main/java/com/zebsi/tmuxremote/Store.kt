@@ -114,6 +114,11 @@ object Store {
         get() = prefs.getBoolean("askedBattery", false)
         set(v) = prefs.edit().putBoolean("askedBattery", v).apply()
 
+    /** Read out the short spoken line of each reply in the session on screen. */
+    var speakReplies: Boolean
+        get() = prefs.getBoolean("speakReplies", false)
+        set(v) = prefs.edit().putBoolean("speakReplies", v).apply()
+
     /** Dictation language: "de" or "en". */
     var speechLang: String
         get() = prefs.getString("speechLang", null) ?: if (java.util.Locale.getDefault().language == "de") "de" else "en"
